@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koutník — Pracovní oděvy & OOPP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0A0B0C;
+    --bg2:      #111315;
+    --bg3:      #1A1D20;
+    --border:   #272B2F;
+    --orange:   #FF5E1A;
+    --orange2:  #FF8C57;
+    --steel:    #2A4A6B;
+    --text:     #E4E6E8;
+    --muted:    #7A8491;
+    --white:    #FFFFFF;
+    --font-h:   'Barlow Condensed', sans-serif;
+    --font-b:   'Barlow', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,11,12,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 0 2.5rem;
+    height: 64px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .logo-main {
+    font-family: var(--font-h);
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .logo-sub {
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .search-wrap {
+    flex: 1;
+    max-width: 520px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.55rem 1rem 0.55rem 2.8rem;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-wrap input:focus { border-color: var(--orange); }
+  .search-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  .btn-ghost {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.9rem;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .btn-ghost:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-ghost svg { flex-shrink: 0; }
+
+  .btn-cart {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1.1rem;
+    background: var(--orange);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    font-family: var(--font-b);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-cart:hover { background: var(--orange2); }
+  .cart-count {
+    background: rgba(255,255,255,0.25);
+    border-radius: 99px;
+    padding: 0.05rem 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  nav {
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 2.5rem;
+    max-width: 1440px;
+    margin: 0 auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.18s, border-color 0.18s;
+  }
+  .nav-link:hover { color: var(--text); }
+  .nav-link.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    min-height: 520px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    padding: 5rem 2.5rem 4rem;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(42,74,107,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(255,94,26,0.12) 0%, transparent 60%),
+      linear-gradient(160deg, #0A0B0C 0%, #111820 100%);
+  }
+
+  /* Industrial grid lines */
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,94,26,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,94,26,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+  }
+
+  /* Diagonal accent */
+  .hero-accent {
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 500px;
+    height: 500px;
+    border: 1px solid rgba(255,94,26,0.15);
+    border-radius: 50%;
+    animation: pulse 4s ease-in-out infinite;
+  }
+  .hero-accent::after {
+    content: '';
+    position: absolute;
+    inset: 40px;
+    border: 1px solid rgba(255,94,26,0.08);
+    border-radius: 50%;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.7; }
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,94,26,0.15);
+    border: 1px solid rgba(255,94,26,0.35);
+    border-radius: 3px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 1.5rem;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--orange);
+    border-radius: 50%;
+    animation: blink 1.5s ease infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero-content { position: relative; z-index: 2; max-width: 720px; }
+
+  .hero-title {
+    font-family: var(--font-h);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 1.5rem;
+  }
+  .hero-title em {
+    font-style: normal;
+    color: var(--orange);
+    display: block;
+  }
+
+  .hero-desc {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 420px;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2rem;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-family: var(--font-h);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--orange2); transform: translateY(-1px); }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2rem;
+    background: none;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-family: var(--font-h);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--text); }
+
+  .hero-stats {
+    position: absolute;
+    right: 2.5rem;
+    bottom: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    z-index: 2;
+  }
+  .stat {
+    text-align: right;
+  }
+  .stat-num {
+    font-family: var(--font-h);
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stat-divider {
+    width: 1px;
+    height: 30px;
+    background: var(--border);
+    margin-left: auto;
+  }
+
+  /* ─── TRUST BAR ─── */
+  .trust-bar {
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .trust-inner {
+    display: flex;
+    align-items: stretch;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1.1rem 2rem 1.1rem 0;
+    flex: 1;
+    border-right: 1px solid var(--border);
+  }
+  .trust-item:last-child { border-right: none; }
+  .trust-item:not(:first-child) { padding-left: 2rem; }
+  .trust-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,94,26,0.12);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--orange);
+  }
+  .trust-text strong { display: block; font-size: 0.85rem; font-weight: 600; color: var(--white); }
+  .trust-text span { font-size: 0.75rem; color: var(--muted); }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 4rem 2.5rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    gap: 1rem;
+  }
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-family: var(--font-h);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--white);
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+  }
+  .section-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--orange);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: gap 0.2s;
+  }
+  .section-link:hover { gap: 0.7rem; }
+
+  /* ─── CATEGORIES ─── */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .cat-card {
+    background: var(--bg2);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .cat-card:hover { background: var(--bg3); }
+  .cat-card:hover::before { transform: scaleX(1); }
+
+  .cat-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,94,26,0.1);
+    border: 1px solid rgba(255,94,26,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+    font-size: 1.4rem;
+    transition: background 0.2s;
+  }
+  .cat-card:hover .cat-icon { background: rgba(255,94,26,0.18); }
+
+  .cat-name {
+    font-family: var(--font-h);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .cat-count {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .cat-arrow {
+    position: absolute;
+    right: 1.2rem;
+    bottom: 1.2rem;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .cat-card:hover .cat-arrow { color: var(--orange); transform: translate(3px, -3px); }
+
+  /* ─── PRODUCTS ─── */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+
+  .product-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .product-card:hover {
+    border-color: rgba(255,94,26,0.4);
+    transform: translateY(-3px);
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2;
+    background: var(--orange);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.55rem;
+    border-radius: 3px;
+  }
+  .badge-sale { background: #2ECC71; }
+
+  .product-img {
+    aspect-ratio: 1;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .product-img-placeholder {
+    font-size: 4rem;
+    opacity: 0.25;
+  }
+  .product-quick {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,11,12,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .product-card:hover .product-quick { opacity: 1; }
+  .quick-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    font-family: var(--font-h);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .quick-btn:hover { background: var(--orange2); }
+
+  .product-body {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .product-brand {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .product-name {
+    font-family: var(--font-h);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--white);
+    line-height: 1.25;
+  }
+  .product-attrs {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.2rem;
+  }
+  .attr-tag {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .product-footer {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .product-price {
+    font-family: var(--font-h);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--white);
+  }
+  .product-price-old {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: line-through;
+    margin-left: 0.3rem;
+    font-weight: 400;
+  }
+  .price-vat {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-weight: 400;
+    font-family: var(--font-b);
+  }
+  .stock-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2ECC71;
+    flex-shrink: 0;
+  }
+  .stock-dot.low { background: #E67E22; }
+  .add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: var(--orange);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .add-btn:hover { background: var(--orange2); }
+
+  /* ─── B2B BANNER ─── */
+  .b2b-section {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2.5rem 4rem;
+  }
+  .b2b-banner {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .b2b-banner::before {
+    content: '';
+    position: absolute;
+    right: -100px;
+    top: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(42,74,107,0.25) 0%, transparent 70%);
+  }
+  .b2b-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .b2b-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--orange);
+  }
+  .b2b-title {
+    font-family: var(--font-h);
+    font-size: 2.4rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .b2b-desc {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+  .b2b-perks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .perk {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+  .perk-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,94,26,0.12);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .perk-text strong { display: block; font-size: 0.85rem; font-weight: 600; color: var(--white); }
+  .perk-text span { font-size: 0.77rem; color: var(--muted); }
+
+  .b2b-form-side {
+    position: relative;
+    z-index: 1;
+  }
+  .b2b-form-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+  .b2b-form-title {
+    font-family: var(--font-h);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--white);
+    margin-bottom: 1.25rem;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+  .form-group label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .form-group input, .form-group select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.6rem 0.9rem;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--orange); }
+  .form-group input::placeholder { color: var(--muted); }
+  .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A8491' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; cursor: pointer; }
+  .form-group select option { background: var(--bg2); }
+
+  /* ─── NEWSLETTER ─── */
+  .newsletter {
+    background: linear-gradient(135deg, rgba(255,94,26,0.08) 0%, rgba(42,74,107,0.12) 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .nl-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 3.5rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+  }
+  .nl-text { flex: 1; }
+  .nl-title {
+    font-family: var(--font-h);
+    font-size: 1.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+  .nl-sub { font-size: 0.9rem; color: var(--muted); }
+  .nl-form {
+    display: flex;
+    gap: 0.75rem;
+    flex: 1;
+    max-width: 480px;
+  }
+  .nl-form input {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .nl-form input:focus { border-color: var(--orange); }
+  .nl-form input::placeholder { color: var(--muted); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 3.5rem 0 0;
+  }
+  .footer-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2.5rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+  }
+  .footer-brand .logo-main { font-size: 1.8rem; margin-bottom: 0.25rem; }
+  .footer-brand .logo-sub { margin-bottom: 1.25rem; display: block; }
+  .footer-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; max-width: 280px; }
+
+  .stores { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
+  .store {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.9rem 1rem;
+  }
+  .store-city {
+    font-family: var(--font-h);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 0.2rem;
+  }
+  .store-info { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
+  .store-hours { color: var(--orange); font-size: 0.72rem; margin-top: 0.2rem; }
+
+  .footer-col h4 {
+    font-family: var(--font-h);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 1.25rem;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .footer-col ul li a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .footer-col ul li a::before {
+    content: '';
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.18s;
+  }
+  .footer-col ul li a:hover { color: var(--text); }
+  .footer-col ul li a:hover::before { background: var(--orange); }
+
+  .footer-bottom {
+    margin-top: 3rem;
+    border-top: 1px solid var(--border);
+    padding: 1.25rem 2.5rem;
+    max-width: 1440px;
+    margin: 3rem auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .footer-copy { font-size: 0.75rem; color: var(--muted); }
+  .footer-pay {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .pay-badge {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ─── PHONE BAR ─── */
+  .phone-bar {
+    background: rgba(255,94,26,0.08);
+    border-top: 1px solid rgba(255,94,26,0.2);
+    padding: 0.65rem 2.5rem;
+  }
+  .phone-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .phone-group {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  .phone-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+    text-decoration: none;
+  }
+  .phone-item strong { color: var(--text); font-size: 0.9rem; }
+  .phone-item:hover strong { color: var(--orange); }
+  .since-badge {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .since-badge strong { color: var(--orange); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1100px) {
+    .cat-grid { grid-template-columns: repeat(3, 1fr); }
+    .product-grid { grid-template-columns: repeat(3, 1fr); }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .header-top { padding: 0 1.25rem; gap: 0.75rem; }
+    .btn-ghost span { display: none; }
+    .hero { padding: 3rem 1.25rem 3rem; min-height: auto; }
+    .hero-stats { display: none; }
+    .section { padding: 3rem 1.25rem; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+    .b2b-banner { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .nl-inner { flex-direction: column; gap: 1.5rem; }
+    .nl-form { max-width: 100%; width: 100%; }
+    .b2b-perks { grid-template-columns: 1fr; }
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-tag { animation: fadeUp 0.5s ease both; }
+  .hero-title { animation: fadeUp 0.55s 0.1s ease both; }
+  .hero-desc { animation: fadeUp 0.55s 0.2s ease both; }
+  .hero-actions { animation: fadeUp 0.55s 0.3s ease both; }
+
+</style>
+</head>
+<body>
+
+<!-- PHONE BAR -->
+<div class="phone-bar">
+  <div class="phone-inner">
+    <div class="phone-group">
+      <a href="tel:+420495523518" class="phone-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5 19.79 19.79 0 01.1 2.87 2 2 0 012.09 1h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 8.09A16 16 0 0014.13 15.31l.46-.46a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        <span>Hradec Králové</span>
+        <strong>+420 495 523 518</strong>
+      </a>
+      <a href="tel:+420321721013" class="phone-item">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5 19.79 19.79 0 01.1 2.87 2 2 0 012.09 1h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 8.09A16 16 0 0014.13 15.31l.46-.46a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        <span>Kolín</span>
+        <strong>+420 321 721 013</strong>
+      </a>
+    </div>
+    <div class="since-badge">
+      Váš dodavatel od <strong>1991</strong>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <a href="#" class="logo">
+      <span class="logo-main">Koutník</span>
+      <span class="logo-sub">Pracovní oděvy &amp; OOPP</span>
+    </a>
+    <div class="search-wrap">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Hledat obuv, rukavice, respirátory…">
+    </div>
+    <div class="header-actions">
+      <a href="#" class="btn-ghost">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Přihlásit se</span>
+      </a>
+      <a href="#" class="btn-ghost">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Firma</span>
+      </a>
+      <button class="btn-cart">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Košík
+        <span class="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-link active">Vše</a>
+      <a href="#" class="nav-link">Oděvy</a>
+      <a href="#" class="nav-link">Obuv</a>
+      <a href="#" class="nav-link">Rukavice</a>
+      <a href="#" class="nav-link">Ochrana zraku</a>
+      <a href="#" class="nav-link">Ochrana hlavy</a>
+      <a href="#" class="nav-link">Ochrana sluchu</a>
+      <a href="#" class="nav-link">Dýchání</a>
+      <a href="#" class="nav-link">Postroje</a>
+      <a href="#" class="nav-link">Doplňky</a>
+      <a href="#" class="nav-link">Drogistika</a>
+      <a href="#" class="nav-link">Podle profese ↗</a>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-accent"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">Vybavení, na které se dá spolehnout</div>
+    <h1 class="hero-title">
+      Bezpečnost<br>
+      <em>na prvním</em>
+      místě
+    </h1>
+    <p class="hero-desc">
+      Pracovní oděvy, obuv a ochranné pomůcky pro profesionály. Přes 30 let dodáváme kvalitní OOPP firmám po celé ČR.
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">
+        Prohlížet katalog
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#b2b" class="btn-outline">
+        Jsem firma
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">5 000+</div>
+      <div class="stat-label">produktů skladem</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num">33</div>
+      <div class="stat-label">let zkušeností</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num">2</div>
+      <div class="stat-label">prodejny v ČR</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+      <div class="trust-text">
+        <strong>Doprava zdarma</strong>
+        <span>při nákupu nad 2 000 Kč</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      </div>
+      <div class="trust-text">
+        <strong>Faktura ihned</strong>
+        <span>nákup na IČO, odložená platba</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="trust-text">
+        <strong>Certifikované OOPP</strong>
+        <span>EN normy, CE označení</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      </div>
+      <div class="trust-text">
+        <strong>Potisk &amp; výšivky</strong>
+        <span>vaše logo na oděvy</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="trust-text">
+        <strong>2 kamenné prodejny</strong>
+        <span>HK + Kolín, osobní odběr</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Sortiment</div>
+      <h2 class="section-title">Kategorie</h2>
+    </div>
+    <a href="#" class="section-link">Celý katalog <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+  <div class="cat-grid">
+    <a href="#" class="cat-card">
+      <div class="cat-icon">🦺</div>
+      <div class="cat-name">Pracovní<br>oděvy</div>
+      <div class="cat-count">výstražné, průmyslové, zdravotnické</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+    <a href="#" class="cat-card">
+      <div class="cat-icon">👟</div>
+      <div class="cat-name">Pracovní<br>obuv</div>
+      <div class="cat-count">S1, S2, S3 — sandály, kotníkové, zimní</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+    <a href="#" class="cat-card">
+      <div class="cat-icon">🧤</div>
+      <div class="cat-name">Rukavice</div>
+      <div class="cat-count">kombinované, kožené, svářečské, zimní</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+    <a href="#" class="cat-card">
+      <div class="cat-icon">🥽</div>
+      <div class="cat-name">Ochrana<br>zraku</div>
+      <div class="cat-count">brýle, kukly, obličejové štíty</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+    <a href="#" class="cat-card">
+      <div class="cat-icon">⛑️</div>
+      <div class="cat-name">Ochrana<br>hlavy</div>
+      <div class="cat-count">přilby, kombinované helmy</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+    <a href="#" class="cat-card">
+      <div class="cat-icon">🎧</div>
+      <div class="cat-name">Ochrana<br>sluchu</div>
+      <div class="cat-count">zátkové chrániče, sluchátka</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+    <a href="#" class="cat-card">
+      <div class="cat-icon">😷</div>
+      <div class="cat-name">Ochrana<br>dýchání</div>
+      <div class="cat-count">FFP1-FFP3 respirátory, masky, roušky</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+    <a href="#" class="cat-card">
+      <div class="cat-icon">🧹</div>
+      <div class="cat-name">Drogistika<br>&amp; hygiena</div>
+      <div class="cat-count">mycí prostředky, desinfekce, čističe</div>
+      <div class="cat-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- PROFESE BANNER -->
+  <div style="margin-top:1.25rem; background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:1.5rem 2rem; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap;">
+    <div>
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange);margin-bottom:0.35rem;">Nový způsob výběru</div>
+      <div style="font-family:var(--font-h);font-size:1.4rem;font-weight:800;text-transform:uppercase;color:var(--white);">Hledejte podle profese</div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-top:0.3rem;">Svářeč, kuchař, lesník, stavební dělník — filtrujeme za vás</div>
+    </div>
+    <div style="display:flex;gap:0.65rem;flex-wrap:wrap;">
+      <a href="#" style="padding:0.55rem 1.1rem;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:0.82rem;font-weight:600;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='var(--border)'">⚡ Svářeč</a>
+      <a href="#" style="padding:0.55rem 1.1rem;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:0.82rem;font-weight:600;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='var(--border)'">🍳 Kuchař</a>
+      <a href="#" style="padding:0.55rem 1.1rem;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:0.82rem;font-weight:600;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='var(--border)'">🌲 Lesník</a>
+      <a href="#" style="padding:0.55rem 1.1rem;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:0.82rem;font-weight:600;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='var(--border)'">🏗️ Stavebník</a>
+      <a href="#" style="padding:0.55rem 1.1rem;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);text-decoration:none;font-size:0.82rem;font-weight:600;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='var(--border)'">🚑 Zdravotník</a>
+      <a href="#" style="padding:0.55rem 1.1rem;background:rgba(255,94,26,0.1);border:1px solid rgba(255,94,26,0.3);border-radius:5px;color:var(--orange);text-decoration:none;font-size:0.82rem;font-weight:600;">Všechny profese →</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="section" style="padding-top:0">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Doporučujeme</div>
+      <h2 class="section-title">Oblíbené produkty</h2>
+    </div>
+    <a href="#" class="section-link">Vše skladem <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+  <div class="product-grid">
+
+    <!-- Card 1 -->
+    <div class="product-card">
+      <div class="product-badge">Náš tip</div>
+      <div class="product-img">
+        <div class="product-img-placeholder">👟</div>
+        <div class="product-quick">
+          <button class="quick-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Rychlý náhled
+          </button>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="product-brand">Prabos</div>
+        <div class="product-name">Polobotka Sorapis S3</div>
+        <div class="product-attrs">
+          <span class="attr-tag">S3 SRC</span>
+          <span class="attr-tag">EN ISO 20345</span>
+          <span class="attr-tag">vel. 36–47</span>
+        </div>
+      </div>
+      <div class="product-footer">
+        <div>
+          <div class="product-price">1 250 Kč <span class="price-vat">bez DPH</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="stock-dot"></div>
+          <button class="add-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="product-card">
+      <div class="product-badge badge-sale">Akce</div>
+      <div class="product-img">
+        <div class="product-img-placeholder">👖</div>
+        <div class="product-quick">
+          <button class="quick-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Rychlý náhled
+          </button>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="product-brand">Červa</div>
+        <div class="product-name">Kalhoty Laura</div>
+        <div class="product-attrs">
+          <span class="attr-tag">S–XXXL</span>
+          <span class="attr-tag">Dámské</span>
+          <span class="attr-tag">4 barvy</span>
+        </div>
+      </div>
+      <div class="product-footer">
+        <div>
+          <div class="product-price">499 Kč <span class="product-price-old">620 Kč</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="stock-dot"></div>
+          <button class="add-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="product-card">
+      <div class="product-img">
+        <div class="product-img-placeholder">🧤</div>
+        <div class="product-quick">
+          <button class="quick-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Rychlý náhled
+          </button>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="product-brand">Mapa</div>
+        <div class="product-name">Rukavice Titan Winter</div>
+        <div class="product-attrs">
+          <span class="attr-tag">Zimní</span>
+          <span class="attr-tag">vel. 7–11</span>
+          <span class="attr-tag">EN 388</span>
+        </div>
+      </div>
+      <div class="product-footer">
+        <div>
+          <div class="product-price">189 Kč</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="stock-dot low"></div>
+          <button class="add-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="product-card">
+      <div class="product-badge">Náš tip</div>
+      <div class="product-img">
+        <div class="product-img-placeholder">👗</div>
+        <div class="product-quick">
+          <button class="quick-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Rychlý náhled
+          </button>
+        </div>
+      </div>
+      <div class="product-body">
+        <div class="product-brand">Červa</div>
+        <div class="product-name">Legíny Leana</div>
+        <div class="product-attrs">
+          <span class="attr-tag">XS–XXL</span>
+          <span class="attr-tag">Elastické</span>
+        </div>
+      </div>
+      <div class="product-footer">
+        <div>
+          <div class="product-price">345 Kč</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="stock-dot"></div>
+          <button class="add-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- B2B SECTION -->
+<div class="b2b-section" id="b2b">
+  <div class="b2b-banner">
+    <div>
+      <div class="b2b-eyebrow">Pro firmy</div>
+      <h2 class="b2b-title">Nakupujete<br>na firmu?</h2>
+      <p class="b2b-desc">
+        Firemní zákazníci mají přístup k množstevním slevám, odloženým platbám, rychlému přeobjednávání a osobnímu obchodnímu zástupci.
+      </p>
+      <div class="b2b-perks">
+        <div class="perk">
+          <div class="perk-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="perk-text">
+            <strong>Množstevní slevy</strong>
+            <span>automaticky od 5+ ks</span>
+          </div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div class="perk-text">
+            <strong>Faktura se splatností</strong>
+            <span>14 nebo 30 dní</span>
+          </div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          </div>
+          <div class="perk-text">
+            <strong>Potisk &amp; výšivky</strong>
+            <span>logo na všechny oděvy</span>
+          </div>
+        </div>
+        <div class="perk">
+          <div class="perk-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="perk-text">
+            <strong>Osobní zástupce</strong>
+            <span>vždy k dispozici</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="b2b-form-side">
+      <div class="b2b-form-card">
+        <div class="b2b-form-title">Firemní registrace</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Jméno</label>
+            <input type="text" placeholder="Jan Novák">
+          </div>
+          <div class="form-group">
+            <label>Firma</label>
+            <input type="text" placeholder="Firma s.r.o.">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>IČO</label>
+          <input type="text" placeholder="12345678">
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" placeholder="jan@firma.cz">
+        </div>
+        <div class="form-group">
+          <label>Roční nákupy (odhad)</label>
+          <select>
+            <option>do 50 000 Kč</option>
+            <option>50 000 – 200 000 Kč</option>
+            <option>200 000 – 500 000 Kč</option>
+            <option>nad 500 000 Kč</option>
+          </select>
+        </div>
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem;">
+          Odeslat žádost
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:0.75rem;">Zpracujeme do 1 pracovního dne</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="newsletter">
+  <div class="nl-inner">
+    <div class="nl-text">
+      <h3 class="nl-title">Slevy &amp; novinky dříve</h3>
+      <p class="nl-sub">Jen OOPP novinky, žádný spam. Kdykoli odhlásit.</p>
+    </div>
+    <form class="nl-form" onsubmit="return false">
+      <input type="email" placeholder="váš@email.cz">
+      <button class="btn-primary" type="submit" style="white-space:nowrap">Odebírat</button>
+    </form>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="logo">
+        <span class="logo-main">Koutník</span>
+        <span class="logo-sub">Pracovní oděvy a spol. Hradec Králové</span>
+      </a>
+      <p class="footer-desc">Od roku 1991 dodáváme kvalitní pracovní oděvy, obuv a osobní ochranné pracovní pomůcky firmám i soukromým zákazníkům po celé ČR.</p>
+      <div class="stores">
+        <div class="store">
+          <div class="store-city">Hradec Králové</div>
+          <div class="store-info">Pražská třída 799/15a<br>+420 777 626 194</div>
+          <div class="store-hours">Po–Pá 7:00–17:00</div>
+        </div>
+        <div class="store">
+          <div class="store-city">Kolín</div>
+          <div class="store-info">Pobřeží 113<br>+420 321 721 013</div>
+          <div class="store-hours">Po–Čt 8:00–16:30 · Pá 8:00–15:30</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Sortiment</h4>
+      <ul>
+        <li><a href="#">Pracovní oděvy</a></li>
+        <li><a href="#">Pracovní obuv</a></li>
+        <li><a href="#">Rukavice</a></li>
+        <li><a href="#">Ochrana zraku</a></li>
+        <li><a href="#">Ochrana sluchu</a></li>
+        <li><a href="#">Respirátory</a></li>
+        <li><a href="#">Postroje</a></li>
+        <li><a href="#">Drogistika</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Zákazníci</h4>
+      <ul>
+        <li><a href="#">Jak nakupovat</a></li>
+        <li><a href="#">Doprava a platba</a></li>
+        <li><a href="#">Vrácení zboží</a></li>
+        <li><a href="#">Reklamace</a></li>
+        <li><a href="#">Moje objednávky</a></li>
+        <li><a href="#">Kontakt</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Firma</h4>
+      <ul>
+        <li><a href="#">Firemní nákupy</a></li>
+        <li><a href="#">Množstevní slevy</a></li>
+        <li><a href="#">Potisk &amp; výšivky</a></li>
+        <li><a href="#">O nás</a></li>
+        <li><a href="#">Certifikáty</a></li>
+        <li><a href="#">GDPR</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2024 Pracovní oděvy Koutník a spol. · Hradec Králové</div>
+    <div class="footer-pay">
+      <span class="pay-badge">Visa</span>
+      <span class="pay-badge">MC</span>
+      <span class="pay-badge">Převodem</span>
+      <span class="pay-badge">Dobírka</span>
+      <span class="pay-badge">Hotovost</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
